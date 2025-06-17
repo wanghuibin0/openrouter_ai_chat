@@ -39,7 +39,8 @@ if not OPENROUTER_API_KEY:
         sys.exit(1)
 
 # Default model for OpenRouter
-DEFAULT_MODEL = "deepseek/deepseek-chat"  # 这是一个更常用的 DeepSeek 模型别名
+# DEFAULT_MODEL = "deepseek/deepseek-chat"  # 这是一个更常用的 DeepSeek 模型别名
+DEFAULT_MODEL = "deepseek/deepseek-r1-0528-qwen3-8b:free"
 
 
 class OpenRouterChat:
