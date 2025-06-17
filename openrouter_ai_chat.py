@@ -49,11 +49,28 @@ class OpenRouterChat:
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "http://localhost:8000",  # 可以根据你的实际应用设置
+            # "HTTP-Referer": "http://localhost:8000",  # 可以根据你的实际应用设置
             "X-Title": "My OpenRouter Chat App",  # 可以根据你的实际应用设置
         }
         # 维持对话历史
         self.messages = [{"role": "system", "content": "你是一个懂中文的友善的IT专家"}]
+
+    def _load_file_content(self, file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                file_content = f.read()
+
+            # Add file content as a user message to the history
+            # 你可以自定义这里向 AI 表达文件内容的方式
+            self.messages.append({"role": "user", "content": f"以下是我提供的一个文件的内容，请你作为上下文进行理解：\n```\n{file_content}\n```"})
+            print(f"File '{file_path}' loaded and added to context.", file=sys.stderr)
+            return True
+        except FileNotFoundError:
+            print(f"Error: File not found at '{file_path}'.", file=sys.stderr)
+            return False
+        except Exception as e:
+            print(f"Error reading file '{file_path}': {str(e)}", file=sys.stderr)
+            return False
 
     def _send_message_to_ai(self, messages_history):
         """
@@ -183,7 +200,7 @@ class OpenRouterChat:
         """
         print("Welcome to OpenRouter AI Chat!")
         print(
-            "Type your message and press Enter. Type 'exit' to quit. Type 'model <model_name>' to switch models.\n"
+            "Type your message and press Enter. Type 'exit' to quit. Type 'model <model_name>' to switch models.\nType '/file path' to add file content as context\n"
         )
 
         while True:
@@ -198,6 +215,13 @@ class OpenRouterChat:
                     self.model = new_model
                     print(f"Switched model to: {self.model}")
                     continue
+                elif user_message.lower().startswith("/file "):
+                    file_path = user_message[len("/file "):].strip()
+                    if file_path:
+                        self._load_file_content(file_path)
+                    else:
+                        print("Please provide a file path for /file command.", file=sys.stderr)
+                    continue # Do not send command to AI, continue loop
 
                 # 将用户消息添加到对话历史
                 self.messages.append({"role": "user", "content": user_message})
